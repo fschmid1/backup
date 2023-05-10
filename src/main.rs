@@ -46,26 +46,26 @@ fn execute(command: String, args: Vec<String>) -> bool {
     return output.status.success();
 }
 
-fn create_ifnot_exitsts(folder: String) {
-    let mut cmd = std::process::Command::new("mkdir");
-    cmd.arg("-p");
-    cmd.arg(folder);
+fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
+    let mut cmd = std::process::Command::new("ssh");
+    cmd.arg(format!("{}@{}", user, server));
+    cmd.arg(format!("\"mkdir -p {}\"", folder));
     cmd.output().expect("failed to execute process");
 }
 
-fn create_folders(target_folder: String) {
-    create_ifnot_exitsts(format!("{}/hourly", target_folder));
-    create_ifnot_exitsts(format!("{}/weekly", target_folder));
-    create_ifnot_exitsts(format!("{}/monthly", target_folder));
+fn create_folders(target_folder: String, user: String, server: String) {
+    create_ifnot_exitsts(format!("{}/hourly", target_folder), &user, &server);
+    create_ifnot_exitsts(format!("{}/weekly", target_folder), &user, &server);
+    create_ifnot_exitsts(format!("{}/monthly", target_folder), &user, &server);
 
     for i in 1..25 {
-        create_ifnot_exitsts(format!("{}/hourly/{}", target_folder, i));
+        create_ifnot_exitsts(format!("{}/hourly/{}", target_folder, i), &user, &server);
     }
     for i in 1..6 {
-        create_ifnot_exitsts(format!("{}/weekly/{}", target_folder, i));
+        create_ifnot_exitsts(format!("{}/weekly/{}", target_folder, i), &user, &server);
     }
     for i in 1..13 {
-        create_ifnot_exitsts(format!("{}/monthly/{}", target_folder, i));
+        create_ifnot_exitsts(format!("{}/monthly/{}", target_folder, i), &user, &server);
     }
 }
 
@@ -101,7 +101,7 @@ async fn main() -> Result<(), JobSchedulerError> {
     ]
     .to_vec();
 
-    create_folders(target_folder.clone());
+    create_folders(target_folder.clone(), user.clone(), server.clone());
 
     let sched = JobScheduler::new().await.unwrap();
 

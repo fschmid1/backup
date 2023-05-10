@@ -1,10 +1,12 @@
 fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
-    let mut cmd = std::process::Command::new("bash");
-    cmd.args([
-        "-c".to_string(),
-        format!("ssh {}@{} 'mkdir -p {}'", user, server, folder),
-    ]);
-    cmd.output().expect("failed to execute process");
+    super::shell::execute(
+        "ssh".to_string(),
+        [
+            format!("{}@{}", user, server),
+            format!("'mkdir -p {}'", folder),
+        ]
+        .to_vec(),
+    );
 }
 
 fn create_hourly(target_folder: String, user: String, server: String) {

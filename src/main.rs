@@ -59,12 +59,18 @@ fn create_folders(target_folder: String, user: String, server: String) {
     create_ifnot_exitsts(format!("{}/monthly", target_folder), &user, &server);
 
     for i in 1..25 {
+        let user = user.clone();
+        let server = server.clone();
         create_ifnot_exitsts(format!("{}/hourly/{}", target_folder, i), &user, &server);
     }
     for i in 1..6 {
+        let user = user.clone();
+        let server = server.clone();
         create_ifnot_exitsts(format!("{}/weekly/{}", target_folder, i), &user, &server);
     }
     for i in 1..13 {
+        let user = user.clone();
+        let server = server.clone();
         create_ifnot_exitsts(format!("{}/monthly/{}", target_folder, i), &user, &server);
     }
 }

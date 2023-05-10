@@ -50,6 +50,12 @@ fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
     let mut cmd = std::process::Command::new("ssh");
     cmd.arg(format!("{}@{}", user, server));
     cmd.arg(format!("\"mkdir -p {}\"", folder));
+    println!(
+        "{} {} {}",
+        "ssh".to_string(),
+        format!("{}@{}", user, server),
+        format!("\"mkdir -p {}\"", folder)
+    );
     cmd.output().expect("failed to execute process");
 }
 
@@ -115,8 +121,8 @@ fn print_success(success: bool, label: String) {
 #[tokio::main]
 async fn main() -> Result<(), JobSchedulerError> {
     dotenv().ok();
-    let server = std::env::var("SERVER").unwrap().to_string();
-    let user = std::env::var("USER").unwrap().to_string();
+    let server = std::env::var("SSH_SERVER").unwrap().to_string();
+    let user = std::env::var("SSH_USER").unwrap().to_string();
     let src_folder = std::env::var("SRC_FOLDER").unwrap().to_string();
     let target_folder = std::env::var("TARGET_FOLDER").unwrap().to_string();
     let args = [

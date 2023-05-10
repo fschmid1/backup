@@ -2,7 +2,7 @@ fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
     let mut cmd = std::process::Command::new("ssh");
     cmd.args([
         format!("{}@{}", user, server),
-        format!("\"mkdir -p {}\"", folder),
+        format!("'mkdir -p {}'", folder),
     ]);
     let output = cmd.output().expect("failed to execute process");
     let out = String::from_utf8(output.stdout).unwrap();

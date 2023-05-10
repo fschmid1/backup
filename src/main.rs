@@ -1,42 +1,10 @@
-use chrono::prelude::*;
 use colored::Colorize;
 use dotenv::dotenv;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
+use util::dates::{get_dates, get_last_dates};
+use util::folders::create_folders;
 
-fn get_dates() -> (u32, u32, u32, u32) {
-    let now = chrono::Local::now();
-    let month = now.month();
-    let week = (now.day() - 1) / 7 + 1;
-    let day = now.weekday().num_days_from_monday() + 1;
-    let hour = now.hour();
-    (month, week, day, hour)
-}
-
-fn get_last_dates() -> (u32, u32, u32, u32) {
-    let now = chrono::Local::now();
-    let month = if now.month() - 1 == 0 {
-        12
-    } else {
-        now.month() - 1
-    };
-    let week = if now.day() - 7 <= 0 {
-        1
-    } else {
-        (now.day() - 7) / 7 + 1
-    };
-    let day = if now.weekday().num_days_from_monday() - 1 <= 0 {
-        7
-    } else {
-        now.weekday().num_days_from_monday()
-    };
-    let hour = if now.hour() - 1 <= 0 {
-        24
-    } else {
-        now.hour() - 1
-    };
-
-    (month, week, day, hour)
-}
+mod util;
 
 fn execute(command: String, args: Vec<String>) -> bool {
     println!("{} {}", command.clone(), args.clone().join(" "));
@@ -46,74 +14,20 @@ fn execute(command: String, args: Vec<String>) -> bool {
     return output.status.success();
 }
 
-fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
-    let mut cmd = std::process::Command::new("ssh");
-    cmd.arg(format!("{}@{}", user, server));
-    cmd.arg(format!("\"mkdir -p {}\"", folder));
-    println!(
-        "{} {} {}",
-        "ssh".to_string(),
-        format!("{}@{}", user, server),
-        format!("\"mkdir -p {}\"", folder)
-    );
-    cmd.output().expect("failed to execute process");
-}
-
-fn create_houry(target_folder: String, user: String, server: String) {
-    create_ifnot_exitsts(format!("{}/hourly", target_folder), &user, &server);
-    for i in 1..25 {
-        create_ifnot_exitsts(format!("{}/hourly/{}", target_folder, i), &user, &server);
-    }
-}
-
-fn create_monthly(target_folder: String, user: String, server: String) {
-    create_ifnot_exitsts(format!("{}/monthly", target_folder), &user, &server);
-    for i in 1..13 {
-        let user = user.clone();
-        let server = server.clone();
-        create_ifnot_exitsts(format!("{}/monthly/{}", target_folder, i), &user, &server);
-    }
-}
-
-fn create_weekly(target_folder: String, user: String, server: String) {
-    create_ifnot_exitsts(format!("{}/weekly", target_folder), &user, &server);
-    for i in 1..6 {
-        let user = user.clone();
-        let server = server.clone();
-        create_ifnot_exitsts(format!("{}/weekly/{}", target_folder, i), &user, &server);
-    }
-}
-
-fn create_daily(target_folder: String, user: String, server: String) {
-    create_ifnot_exitsts(format!("{}/daily", target_folder), &user, &server);
-    for i in 1..8 {
-        let user = user.clone();
-        let server = server.clone();
-        create_ifnot_exitsts(format!("{}/daily/{}", target_folder, i), &user, &server);
-    }
-}
-
-fn create_folders(target_folder: String, user: String, server: String) {
-    create_houry(target_folder.clone(), user.clone(), server.clone());
-    create_daily(target_folder.clone(), user.clone(), server.clone());
-    create_weekly(target_folder.clone(), user.clone(), server.clone());
-    create_monthly(target_folder.clone(), user.clone(), server.clone());
-}
-
 fn print_success(success: bool, label: String) {
     if success {
         println!(
-            "{} {} {:?}",
+            "{:?} {} {}",
+            chrono::Local::now(),
             label.green(),
             "Success".green(),
-            chrono::Local::now()
         );
     } else {
         println!(
-            "{} {} {:?}",
+            "{:?} {} {}",
+            chrono::Local::now(),
             label.red(),
             "Failed".red(),
-            chrono::Local::now()
         );
     }
 }

@@ -4,7 +4,11 @@ fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
         format!("{}@{}", user, server),
         format!("\"mkdir -p {}\"", folder),
     ]);
-    cmd.output().expect("failed to execute process");
+    let output = cmd.output().expect("failed to execute process");
+    let out = String::from_utf8(output.stdout).unwrap();
+    println!("{}", out);
+    let err = String::from_utf8(output.stderr).unwrap();
+    println!("{}", err);
 }
 
 fn create_hourly(target_folder: String, user: String, server: String) {

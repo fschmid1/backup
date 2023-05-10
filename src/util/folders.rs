@@ -1,14 +1,10 @@
 fn create_ifnot_exitsts(folder: String, user: &String, server: &String) {
-    let mut cmd = std::process::Command::new("ssh");
+    let mut cmd = std::process::Command::new("bash");
     cmd.args([
-        format!("{}@{}", user, server),
-        format!("'mkdir -p {}'", folder),
+        "-c".to_string(),
+        format!("ssh {}@{} 'mkdir -p {}'", user, server, folder),
     ]);
-    let output = cmd.output().expect("failed to execute process");
-    let out = String::from_utf8(output.stdout).unwrap();
-    println!("{}", out);
-    let err = String::from_utf8(output.stderr).unwrap();
-    println!("{}", err);
+    cmd.output().expect("failed to execute process");
 }
 
 fn create_hourly(target_folder: String, user: String, server: String) {

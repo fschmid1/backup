@@ -8,8 +8,8 @@ mod util;
 
 fn execute(command: String, args: Vec<String>) -> bool {
     println!("{} {}", command.clone(), args.clone().join(" "));
-    let mut cmd = std::process::Command::new(command);
-    cmd.args(args);
+    let mut cmd = std::process::Command::new("bash");
+    cmd.args(["-c".to_string(), format!("{} {}", command, args.join(" "))]);
     let output = cmd.output().expect("failed to execute process");
     return output.status.success();
 }

@@ -1,3 +1,4 @@
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use colored::Colorize;
 use diesel::prelude::*;
@@ -6,11 +7,11 @@ use routes::restore::restore_handler;
 use std::env;
 use std::io::prelude::*;
 use std::sync::{Arc, Mutex};
-use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
-use util::dates::{get_dates, get_last_dates};
-use util::folders::create_folders;
+use tokio_cron_scheduler::JobScheduler;
 
-use crate::jobs::register_hourly_cron;
+use crate::jobs::{
+    register_daily_cron, register_hourly_cron, register_monthly_cron, register_weekly_cron,
+};
 
 mod db;
 mod jobs;
@@ -67,112 +68,21 @@ async fn main() -> std::io::Result<()> {
     .to_vec();
 
     // create_folders(target_folder.clone(), user.clone(), server.clone());
-
+    let connection_mutex = Arc::new(Mutex::new(connection));
     let sched = JobScheduler::new().await.unwrap();
-    register_hourly_cron(
-        Arc::new(Mutex::new(connection)),
-        sched.clone(),
-        args.clone(),
-    )
-    .await;
-
-    // //daily
-    // {
-    //     let args = args.clone();
-    //     let target_folder = target_folder.clone();
-    //     let src_folder = src_folder.clone();
-    //     sched
-    //         .add(
-    //             Job::new("1 16 1 * * *", move |_, _| {
-    //                 let (_, _, day, _) = get_dates();
-    //                 let (_, _, last_day, _) = get_last_dates();
-    //                 let args = args.clone();
-    //                 let success = execute(
-    //                     "rsync".to_string(),
-    //                     [
-    //                         args[0].clone(),
-    //                         args[1].clone(),
-    //                         src_folder.clone(),
-    //                         format!(
-    //                             "--compare-dest='{}'",
-    //                             format!("{}/daily/{}", target_folder, last_day)
-    //                         ),
-    //                         format!("{}/daily/{}", target_folder, day),
-    //                     ]
-    //                     .to_vec(),
-    //                 );
-    //                 print_success(success, "Daily".to_string());
-    //             })
-    //             .unwrap(),
-    //         )
-    //         .await
-    //         .unwrap();
-    // }
-
-    // // //weekly
-    // {
-    //     let args = args.clone();
-    //     let target_folder = target_folder.clone();
-    //     let src_folder = src_folder.clone();
-    //     sched
-    //         .add(
-    //             Job::new("1 14 1 * * 1", move |_, _| {
-    //                 let (_, week, _, _) = get_dates();
-    //                 let (_, last_week, _, _) = get_last_dates();
-    //                 let success = execute(
-    //                     "rsync".to_string(),
-    //                     [
-    //                         args[0].clone(),
-    //                         args[1].clone(),
-    //                         src_folder.clone(),
-    //                         format!(
-    //                             "--compare-dest='{}'",
-    //                             format!("{}/weekly/{}", target_folder, last_week)
-    //                         ),
-    //                         format!("{}/weekly/{}", target_folder, week),
-    //                     ]
-    //                     .to_vec(),
-    //                 );
-    //                 print_success(success, "Weekly".to_string());
-    //             })
-    //             .unwrap(),
-    //         )
-    //         .await
-    //         .unwrap();
-    // }
-
-    // // //monthly
-    // {
-    //     let args = args.clone();
-    //     let target_folder = target_folder.clone();
-    //     let src_folder = src_folder.clone();
-    //     sched
-    //         .add(
-    //             Job::new("1 12 1 1 * *", move |_, _| {
-    //                 let (month, _, _, _) = get_dates();
-    //                 let success = execute(
-    //                     "rsync".to_string(),
-    //                     [
-    //                         args[0].clone(),
-    //                         args[1].clone(),
-    //                         src_folder.clone(),
-    //                         format!("{}/monthly/{}", target_folder, month),
-    //                     ]
-    //                     .to_vec(),
-    //                 );
-    //                 print_success(success, "Monthly".to_string());
-    //             })
-    //             .unwrap(),
-    //         )
-    //         .await
-    //         .unwrap();
-    // }
+    register_hourly_cron(connection_mutex.clone(), sched.clone(), args.clone()).await;
+    register_daily_cron(connection_mutex.clone(), sched.clone(), args.clone()).await;
+    register_weekly_cron(connection_mutex.clone(), sched.clone(), args.clone()).await;
+    register_monthly_cron(connection_mutex.clone(), sched.clone(), args.clone()).await;
 
     sched.start().await.unwrap();
     println!("Started backup scheduler");
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(connection_mutex.clone()))
             .route("/", web::get().to(home_route))
+            .wrap(Logger::default())
+            .service(web::scope("/api/jobs").configure(routes::jobs::init))
             .service(restore_handler)
     })
     .bind(("0.0.0.0", 8080))?

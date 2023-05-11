@@ -4,7 +4,7 @@ use crate::db::models::{DeleteBackupJob, NewBackupJob, UpdateBackupJob};
 
 use super::super::db::{models::BackupJob, schema::job};
 use actix_web::{
-    web::{self, get},
+    web::{self},
     HttpResponse, Responder,
 };
 use diesel::{ExpressionMethods, QueryDsl};

@@ -1,7 +1,7 @@
 use diesel::{AsChangeset, Identifiable, Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
-use super::schema::backup_jobs;
+use super::schema::*;
 
 #[derive(Serialize, Queryable, Debug, PartialEq, Eq, Identifiable)]
 #[table_name = "backup_jobs"]
@@ -45,4 +45,14 @@ pub struct UpdateBackupJob {
 #[derive(Debug, Clone, Serialize)]
 pub struct DeleteBackupJob {
     pub success: bool,
+}
+
+#[derive(Serialize, Queryable, Debug, PartialEq, Eq, Identifiable)]
+#[table_name = "logs"]
+pub struct Log {
+    pub id: Option<i32>,
+    pub job_id: Option<String>,
+    pub level: i32,
+    pub message: String,
+    pub created_at: Option<chrono::NaiveDateTime>,
 }

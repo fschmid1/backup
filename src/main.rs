@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(home_route))
             .wrap(Logger::default())
             .service(web::scope("/api/jobs").configure(routes::jobs::init))
-            .service(restore_handler)
+            .service(web::resource("/api/restore").route(web::post().to(restore_handler)))
     })
     .bind(("0.0.0.0", 8080))?
     .run()

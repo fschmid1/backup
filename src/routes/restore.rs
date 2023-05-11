@@ -1,9 +1,9 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
-struct RestoreRequest {
+pub struct RestoreRequest {
     pub day: i32,
     pub week: i32,
     pub month: i32,
@@ -11,13 +11,13 @@ struct RestoreRequest {
 }
 
 #[derive(Serialize)]
-struct RestoreResponse {
+pub struct RestoreResponse {
     day: i32,
     week: i32,
     month: i32,
     hour: i32,
 }
-#[post("/restore")]
+
 pub async fn restore_handler(request: web::Json<RestoreRequest>) -> impl Responder {
     if request.month > 12 || request.month < 1 {
         return HttpResponse::BadRequest().body("Invalid month");

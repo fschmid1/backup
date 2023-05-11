@@ -21,7 +21,7 @@ pub async fn register_hourly_cron(
     let connection = connection.clone();
     sched
         .add(
-            Job::new("1 18 * * * *", move |_, _| {
+            Job::new("1 1 * * * *", move |_, _| {
                 let (_, _, _, hour) = get_dates();
                 let (_, _, _, last_hour) = get_last_dates();
                 let args = args.clone();
@@ -69,7 +69,7 @@ pub async fn register_daily_cron(
     let connection = connection.clone();
     sched
         .add(
-            Job::new("1 14 1 * * 1", move |_, _| {
+            Job::new("1 1 5 * * *", move |_, _| {
                 let (_, _, day, _) = get_dates();
                 let (_, _, last_day, _) = get_last_dates();
                 let args = args.clone();
@@ -117,7 +117,7 @@ pub async fn register_weekly_cron(
     let connection = connection.clone();
     sched
         .add(
-            Job::new("1 16 1 * * **", move |_, _| {
+            Job::new("1 1 4 * * 1", move |_, _| {
                 let (_, week, _, _) = get_dates();
                 let (_, last_week, _, _) = get_last_dates();
                 let args = args.clone();
@@ -165,7 +165,7 @@ pub async fn register_monthly_cron(
     let connection = connection.clone();
     sched
         .add(
-            Job::new("1 12 1 1 * *", move |_, _| {
+            Job::new("1 30 4 1 * *", move |_, _| {
                 let (month, _, _, _) = get_dates();
                 let args = args.clone();
                 if let Ok(mut conn) = connection.lock() {

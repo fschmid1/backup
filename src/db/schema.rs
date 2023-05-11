@@ -1,5 +1,5 @@
 diesel::table! {
-    job (id) {
+    backup_jobs (id) {
         id -> Text,
         name -> Text,
         src -> Text,

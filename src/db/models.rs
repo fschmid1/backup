@@ -1,10 +1,10 @@
 use diesel::{AsChangeset, Identifiable, Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
-use super::schema::job;
+use super::schema::backup_jobs;
 
 #[derive(Serialize, Queryable, Debug, PartialEq, Eq, Identifiable)]
-#[table_name = "job"]
+#[table_name = "backup_jobs"]
 pub struct BackupJob {
     pub id: String,
     pub name: String,
@@ -17,7 +17,7 @@ pub struct BackupJob {
 }
 
 #[derive(Deserialize, Serialize, Clone, Insertable, Debug, PartialEq, Eq)]
-#[table_name = "job"]
+#[table_name = "backup_jobs"]
 pub struct NewBackupJob {
     pub id: Option<String>,
     pub name: String,
@@ -30,7 +30,7 @@ pub struct NewBackupJob {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, AsChangeset)]
-#[table_name = "job"]
+#[table_name = "backup_jobs"]
 pub struct UpdateBackupJob {
     pub id: String,
     pub name: Option<String>,

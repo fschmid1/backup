@@ -1,11 +1,11 @@
 use std::sync::{Arc, Mutex};
 
-use diesel::{ExpressionMethods};
+use diesel::ExpressionMethods;
 use diesel::{query_dsl::methods::FilterDsl, RunQueryDsl, SqliteConnection};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 use crate::{
-    db::{models::BackupJob, schema::job},
+    db::{models::BackupJob, schema::backup_jobs},
     print_success,
     util::{
         dates::{get_dates, get_last_dates},
@@ -26,8 +26,8 @@ pub async fn register_hourly_cron(
                 let (_, _, _, last_hour) = get_last_dates();
                 let args = args.clone();
                 if let Ok(mut conn) = connection.lock() {
-                    let backup_jobs = job::table
-                        .filter(job::hourly.eq(true))
+                    let backup_jobs = backup_jobs::table
+                        .filter(backup_jobs::hourly.eq(true))
                         .load::<BackupJob>(&mut *conn);
                     let backup_jobs: Vec<BackupJob> = match backup_jobs {
                         Ok(backup_jobs) => backup_jobs,
@@ -74,8 +74,8 @@ pub async fn register_daily_cron(
                 let (_, _, last_day, _) = get_last_dates();
                 let args = args.clone();
                 if let Ok(mut conn) = connection.lock() {
-                    let backup_jobs = job::table
-                        .filter(job::daily.eq(true))
+                    let backup_jobs = backup_jobs::table
+                        .filter(backup_jobs::daily.eq(true))
                         .load::<BackupJob>(&mut *conn);
                     let backup_jobs: Vec<BackupJob> = match backup_jobs {
                         Ok(backup_jobs) => backup_jobs,
@@ -122,8 +122,8 @@ pub async fn register_weekly_cron(
                 let (_, last_week, _, _) = get_last_dates();
                 let args = args.clone();
                 if let Ok(mut conn) = connection.lock() {
-                    let backup_jobs = job::table
-                        .filter(job::daily.eq(true))
+                    let backup_jobs = backup_jobs::table
+                        .filter(backup_jobs::daily.eq(true))
                         .load::<BackupJob>(&mut *conn);
                     let backup_jobs: Vec<BackupJob> = match backup_jobs {
                         Ok(backup_jobs) => backup_jobs,
@@ -169,8 +169,8 @@ pub async fn register_monthly_cron(
                 let (month, _, _, _) = get_dates();
                 let args = args.clone();
                 if let Ok(mut conn) = connection.lock() {
-                    let backup_jobs = job::table
-                        .filter(job::daily.eq(true))
+                    let backup_jobs = backup_jobs::table
+                        .filter(backup_jobs::daily.eq(true))
                         .load::<BackupJob>(&mut *conn);
                     let backup_jobs: Vec<BackupJob> = match backup_jobs {
                         Ok(backup_jobs) => backup_jobs,

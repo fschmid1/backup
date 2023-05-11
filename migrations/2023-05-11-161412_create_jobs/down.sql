@@ -1,1 +1,1 @@
-DROP TABLE job;
+DROP TABLE backup_jobs;

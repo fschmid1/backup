@@ -16,17 +16,17 @@ pub fn get_last_dates() -> (u32, u32, u32, u32) {
     } else {
         now.month() - 1
     };
-    let week = if now.day() - 7 <= 0 {
+    let week = if (now.day() as i32) - 7 <= 0 {
         1
     } else {
         (now.day() - 7) / 7 + 1
     };
-    let day = if now.weekday().num_days_from_monday() - 1 <= 0 {
+    let day = if (now.weekday().num_days_from_monday() as i32) - 1 <= 0 {
         7
     } else {
         now.weekday().num_days_from_monday()
     };
-    let hour = if now.hour() - 1 <= 0 {
+    let hour = if (now.hour() as i32) - 1 <= 0 {
         24
     } else {
         now.hour() - 1

@@ -1,15 +1,15 @@
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use colored::Colorize;
-use diesel::prelude::*;
+
 use dotenv::dotenv;
 use routes::restore::restore_handler;
-use std::env;
+
 use std::io::prelude::*;
-use std::sync::{Arc, Mutex};
+
 use tokio_cron_scheduler::JobScheduler;
 
-use crate::db::wrapper::establish_connection;
+
 use crate::jobs::{
     register_daily_cron, register_hourly_cron, register_monthly_cron, register_weekly_cron,
 };

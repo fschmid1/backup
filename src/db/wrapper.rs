@@ -1,11 +1,11 @@
 use super::models::BackupJob;
 
 use super::schema::backup_jobs;
-use actix_web::web::{self, Data};
+
 use diesel::{Connection, ExpressionMethods, QueryDsl};
 use diesel::{RunQueryDsl, SqliteConnection};
 use std::env;
-use std::sync::{Arc, Mutex, MutexGuard};
+
 
 #[derive(Debug)]
 pub struct BackupJobError {

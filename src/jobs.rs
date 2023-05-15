@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
+
 
 use diesel::ExpressionMethods;
-use diesel::{query_dsl::methods::FilterDsl, RunQueryDsl, SqliteConnection};
+use diesel::{query_dsl::methods::FilterDsl, RunQueryDsl};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 use crate::db::wrapper::establish_connection;

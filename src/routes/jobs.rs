@@ -1,7 +1,6 @@
 use crate::{
     db::{
         models::{DeleteBackupJob, NewBackupJob},
-        traits::Restoreable,
         wrapper::{establish_connection, get_job},
     },
     util::folders::create_folders,

@@ -1,4 +1,4 @@
-use crate::db::{models::BackupJob, wrapper::update_job};
+use crate::db::{models::BackupJob};
 
 pub trait Restoreable {
     fn restore(&self, dates: (i32, i32, i32, i32));
@@ -6,7 +6,7 @@ pub trait Restoreable {
 
 impl Restoreable for BackupJob {
     fn restore(&self, dates: (i32, i32, i32, i32)) {
-        let (month, weel, day, hour) = dates;
+        let (_month, _weel, _day, _hour) = dates;
         tokio::spawn(async move {});
     }
 }

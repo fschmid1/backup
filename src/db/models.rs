@@ -3,20 +3,23 @@ use serde::{Deserialize, Serialize};
 
 use super::schema::*;
 
-#[derive(Serialize, Queryable, Debug, PartialEq, Eq, Identifiable)]
+#[derive(
+    Serialize, Queryable, Debug, Clone, PartialEq, Eq, Identifiable, Deserialize, AsChangeset,
+)]
 #[table_name = "backup_jobs"]
 pub struct BackupJob {
     pub id: String,
     pub name: String,
     pub src: String,
     pub dst: String,
+    pub is_ready: bool,
     pub hourly: bool,
     pub daily: bool,
     pub weekly: bool,
     pub monthly: bool,
 }
 
-#[derive(Deserialize, Serialize, Clone, Insertable, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Insertable, PartialEq, Eq, AsChangeset, Debug, Clone)]
 #[table_name = "backup_jobs"]
 pub struct NewBackupJob {
     pub id: Option<String>,
@@ -27,19 +30,6 @@ pub struct NewBackupJob {
     pub daily: bool,
     pub weekly: bool,
     pub monthly: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, AsChangeset)]
-#[table_name = "backup_jobs"]
-pub struct UpdateBackupJob {
-    pub id: String,
-    pub name: Option<String>,
-    pub src: Option<String>,
-    pub dst: Option<String>,
-    pub hourly: Option<bool>,
-    pub daily: Option<bool>,
-    pub weekly: Option<bool>,
-    pub monthly: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize)]

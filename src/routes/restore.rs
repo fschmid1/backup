@@ -1,17 +1,21 @@
-use std::sync::{Arc, Mutex};
-
+use crate::db::{traits::Restoreable, wrapper::get_job};
 use actix_web::{web, HttpResponse, Responder};
-
-use diesel::SqliteConnection;
 use serde::{Deserialize, Serialize};
+use serde_valid::Validate;
 
-use crate::db::wrapper::get_job;
-
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct RestoreRequest {
+    #[validate(minimum = 1)]
+    #[validate(maximum = 7)]
     pub day: i32,
+    #[validate(minimum = 1)]
+    #[validate(maximum = 4)]
     pub week: i32,
+    #[validate(minimum = 1)]
+    #[validate(maximum = 12)]
     pub month: i32,
+    #[validate(minimum = 1)]
+    #[validate(maximum = 24)]
     pub hour: i32,
     pub id: String,
 }
@@ -25,29 +29,22 @@ pub struct RestoreResponse {
     dst: String,
 }
 
-pub async fn restore_handler(
-    request: web::Json<RestoreRequest>,
-    conn: web::Data<Arc<Mutex<SqliteConnection>>>,
-) -> impl Responder {
-    if request.month > 12 || request.month < 1 {
-        return HttpResponse::BadRequest().body("Invalid month");
+pub async fn restore_handler(request: web::Json<RestoreRequest>) -> impl Responder {
+    if let Err(err) = request.validate() {
+        return HttpResponse::BadRequest().body(err.to_string());
     }
-    if request.week > 4 || request.week < 1 {
-        return HttpResponse::BadRequest().body("Invalid week");
-    }
-    if request.day > 7 || request.day < 1 {
-        return HttpResponse::BadRequest().body("Invalid day");
-    }
-    if request.hour > 24 || request.hour < 1 {
-        return HttpResponse::BadRequest().body("Invalid hour");
-    }
-    let backup_job = get_job(conn, request.id.clone()).await;
-
-    HttpResponse::Ok().json(RestoreResponse {
+    let backup_job = match get_job(request.id.clone()).await {
+        Ok(backup_job) => backup_job,
+        Err(err) => {
+            return HttpResponse::BadRequest().body(err.message);
+        }
+    };
+    backup_job.restore((request.month, request.week, request.day, request.hour));
+    return HttpResponse::Ok().json(RestoreResponse {
         day: request.day.clone(),
         week: request.week.clone(),
         month: request.month.clone(),
         hour: request.hour.clone(),
-        dst: backup_job.unwrap().dst,
-    })
+        dst: backup_job.dst,
+    });
 }

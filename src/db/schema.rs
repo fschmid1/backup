@@ -6,6 +6,7 @@ diesel::table! {
         name -> Text,
         src -> Text,
         dst -> Text,
+        is_ready -> Bool,
         hourly -> Bool,
         daily -> Bool,
         weekly -> Bool,
